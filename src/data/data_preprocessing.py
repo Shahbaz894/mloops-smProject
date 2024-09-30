@@ -40,8 +40,9 @@ def remove_stop_words(text):
     return ''.join(text)
 
 def removing_numbers(text):
-    text=''.join([char for char in text if not char.isdgigit()])
-    return text 
+    text = ''.join([char for char in text if not char.isdigit()])
+    return text
+
 
 def removing_punctuations(text):
     """Remove punctuations from the text."""
