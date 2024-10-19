@@ -90,3 +90,6 @@ target/
 venv
 .venv
 venv/
+.env
+.env/
+env
