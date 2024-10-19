@@ -55,3 +55,20 @@ Project Organization
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+
+
+camman to connect with aws
+
+insall awscli
+ pip install awscli
+ aws configure 
+cerate a I AM USER 
+link it with s3 bucket and add plocies .i add adminstraion and myown polices which connect to s3 bucket
+dvc remote add -d myremote  s3://mloopssmproject
+
+send data to s3 bucket
+dvc add .
+
+dvc commit -m "change in param file"
+
+dvc push
