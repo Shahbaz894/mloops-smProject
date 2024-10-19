@@ -65,6 +65,8 @@ insall awscli
 cerate a I AM USER 
 link it with s3 bucket and add plocies .i add adminstraion and myown polices which connect to s3 bucket
 dvc remote add -d myremote  s3://mloopssmproject
+for generating requirements.txt for github runner to install all required library write this command and it genrate all necessary libray.
+pip freeze > requirements.txt
 
 send data to s3 bucket
 dvc add .
