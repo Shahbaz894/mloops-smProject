@@ -1,28 +1,38 @@
 name: CI Pipeline
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   project-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout code
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: setup python
+    - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.10'
 
-    - name: install dependencies
+    - name: Install dependencies
       run: |
         pip install -r requirements.txt
     
-    - name: setup DVC
+    - name: Setup DVC
       run: |
         pip install dvc
     
-    - name: run DVC pipeline
+    - name: Check DVC status
       run: |
-        dvc repro
+        dvc status -v # This will show if there is anything to reproduce
+
+    - name: Run DVC pipeline
+      run: |
+        dvc repro -v # Use verbose mode to see detailed logs
