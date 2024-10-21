@@ -12,13 +12,29 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Set up DagsHub credentials for MLflow tracking
-# dagshub_token = os.getenv("DAGSHUB_PAT") or os.getenv("MLFLOW_TRACKING_PASSWORD")
-# if not dagshub_token:
-#     raise EnvironmentError("DAGSHUB_PAT or MLFLOW_TRACKING_PASSWORD environment variable is not set")
 
-# # os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-# os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+# Now you can access the variables
+dagshub_username = os.getenv("MLFLOW_TRACKING_USERNAME")
+dagshub_password = os.getenv("MLFLOW_TRACKING_PASSWORD")
+
+# Set up MLflow tracking URI
+dagshub_url = "https://dagshub.com"
+repo_owner = "Shahbaz894"
+repo_name = "mloops-smProject"
+
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+
+# Set DagsHub credentials in environment variables
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_username
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_password
+
+# Start MLflow run
+try:
+    with mlflow.start_run() as run:
+        # Your model training/evaluation code goes here
+        ...
+except mlflow.exceptions.MlflowException as e:
+    print(f"MLflow exception: {e}")
 
 dagshub_url = "https://dagshub.com"
 repo_owner = "Shahbaz894"
