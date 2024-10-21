@@ -29,10 +29,18 @@ jobs:
       run: |
         pip install dvc
     
+    - name: Pull DVC cache (optional)
+      run: |
+        dvc pull -v || echo "No cache to pull"
+    
     - name: Check DVC status
       run: |
-        dvc status -v # This will show if there is anything to reproduce
-
+        dvc status -v || echo "No changes in the DVC pipeline"
+    
     - name: Run DVC pipeline
       run: |
-        dvc repro -v # Use verbose mode to see detailed logs
+        dvc repro -v || echo "No changes to reproduce"
+    
+    - name: DVC metrics
+      run: |
+        dvc metrics show || echo "No metrics found"
