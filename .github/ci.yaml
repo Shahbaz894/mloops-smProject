@@ -29,6 +29,10 @@ jobs:
       run: |
         pip install dvc
     
+    - name: Show DVC pipeline
+      run: |
+        dvc pipeline show -v # Show the stages of the pipeline
+
     - name: Pull DVC cache (optional)
       run: |
         dvc pull -v || echo "No cache to pull"
@@ -37,10 +41,10 @@ jobs:
       run: |
         dvc status -v || echo "No changes in the DVC pipeline"
     
-    - name: Run DVC pipeline
+    - name: Force run DVC pipeline
       run: |
-        dvc repro -v || echo "No changes to reproduce"
-    
-    - name: DVC metrics
+        dvc repro -f -v || echo "No stages to run"
+
+    - name: Show DVC metrics
       run: |
         dvc metrics show || echo "No metrics found"
