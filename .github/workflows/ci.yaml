@@ -13,38 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: checkout code
       uses: actions/checkout@v3
 
-    - name: Setup Python
+    - name: setup python
       uses: actions/setup-python@v2
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
+    - name: install dependencies
       run: |
         pip install -r requirements.txt
     
-    - name: Setup DVC
+    - name: setup DVC
       run: |
         pip install dvc
     
-    - name: Show DVC pipeline
+    - name: run DVC pipeline
       run: |
-        dvc pipeline show -v # Show the stages of the pipeline
-
-    - name: Pull DVC cache (optional)
-      run: |
-        dvc pull -v || echo "No cache to pull"
-    
-    - name: Check DVC status
-      run: |
-        dvc status -v || echo "No changes in the DVC pipeline"
-    
-    - name: Force run DVC pipeline
-      run: |
-        dvc repro -f -v || echo "No stages to run"
-
-    - name: Show DVC metrics
-      run: |
-        dvc metrics show || echo "No metrics found"
+        dvc repro  
