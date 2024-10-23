@@ -30,5 +30,7 @@ jobs:
         pip install dvc
     
     - name: run DVC pipeline
+      env:
+        DAGSHUB_PAT: ${{secrets.DAGSHUB_PAT}}
       run: |
         dvc repro  
