@@ -28,20 +28,6 @@ jobs:
     - name: Setup DVC
       run: |
         pip install dvc
-    
-    - name: Add DVC remote
-      run: |
-        dvc remote add -d origin https://dagshub.com/YOUR_USERNAME/YOUR_REPO.dvc
-      env:
-        DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
-
-    - name: Configure DVC remote authentication
-      env:
-        DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
-      run: |
-        dvc remote modify origin --local auth basic
-        dvc remote modify origin --local user YOUR_USERNAME
-        dvc remote modify origin --local password $DAGSHUB_PAT
 
     - name: Run DVC pipeline
       env:
