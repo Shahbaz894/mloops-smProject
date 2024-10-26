@@ -27,11 +27,14 @@ dagshub_username = os.getenv("MLFLOW_TRACKING_USERNAME")
 dagshub_password = os.getenv("MLFLOW_TRACKING_PASSWORD")
 
 # Check if environment variables are available
-if not dagshub_token:
+# if not dagshub_token:
+#     raise EnvironmentError('DAGSHUB_PAT token not found')
+# if not dagshub_username or not dagshub_password:
+#     raise EnvironmentError('MLFLOW_TRACKING_USERNAME or MLFLOW_TRACKING_PASSWORD not found')
+# Access the DAGSHUB_PAT token
+dagshub_token = os.getenv('DAGSHUB_PAT')
+if dagshub_token is None:
     raise EnvironmentError('DAGSHUB_PAT token not found')
-if not dagshub_username or not dagshub_password:
-    raise EnvironmentError('MLFLOW_TRACKING_USERNAME or MLFLOW_TRACKING_PASSWORD not found')
-
 # Set MLflow tracking URI
 mlflow.set_tracking_uri(f'https://dagshub.com/{dagshub_username}/{repo_name}.mlflow')
 
