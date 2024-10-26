@@ -29,7 +29,13 @@ jobs:
       run: |
         pip install dvc
     
-    - name: Configure DVC remote
+    - name: Add DVC remote
+      run: |
+        dvc remote add -d origin https://dagshub.com/<your_username>/<your_repo>.dvc
+      env:
+        DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+
+    - name: Configure DVC remote authentication
       env:
         DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
       run: |
