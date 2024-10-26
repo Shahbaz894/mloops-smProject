@@ -13,24 +13,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout code
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: setup python
+    - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.10'
 
-    - name: install dependencies
+    - name: Install dependencies
       run: |
         pip install -r requirements.txt
     
-    - name: setup DVC
+    - name: Setup DVC
       run: |
         pip install dvc
     
-    - name: run DVC pipeline
+    - name: Configure DVC remote
       env:
-        DAGSHUB_PAT: ${{secrets.DAGSHUB_PAT}}
+        DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
       run: |
-        dvc repro  
+        dvc remote modify origin --local auth basic
+        dvc remote modify origin --local user <your_username>
+        dvc remote modify origin --local password $DAGSHUB_PAT
+
+    - name: Run DVC pipeline
+      env:
+        DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+      run: |
+        dvc repro
