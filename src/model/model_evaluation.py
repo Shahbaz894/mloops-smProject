@@ -17,7 +17,7 @@ import os
 
 # Load environment variables from .env file
 load_dotenv()
-
+dagshub_token = os.getenv("DAGSHUB_PAT")
 # Get environment variables
 dagshub_url = "https://dagshub.com"
 repo_owner = "Shahbaz894"
@@ -35,36 +35,7 @@ if not dagshub_username or not dagshub_password:
 # Set MLflow tracking URI
 mlflow.set_tracking_uri(f'https://dagshub.com/{dagshub_username}/{repo_name}.mlflow')
 
-# Proceed with the rest of your code
-
-
-# dagshub_token=os.getenv['DASHUB_PAT']
-# if not dagshub_token:
-#     raise EnvironmentError('Dagshub_pat token not found')
-# # Now you can access the variables
-# dagshub_username = os.getenv("MLFLOW_TRACKING_USERNAME")
-# dagshub_password = os.getenv("MLFLOW_TRACKING_PASSWORD")
-
-# # Set up MLflow tracking URI
-# dagshub_url = "https://dagshub.com"
-# repo_owner = "Shahbaz894"
-# repo_name = "mloops-smProject"
-
-
-
-# Start MLflow run
-# try:
-#     with mlflow.start_run() as run:
-#         # Your model training/evaluation code goes here
-#         ...
-# except mlflow.exceptions.MlflowException as e:
-#     print(f"MLflow exception: {e}")
-
-
-
-# # Set up MLflow tracking URI
-# mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
-
+print(dagshub_token)
 # logging configuration
 logger = logging.getLogger('model_evaluation')
 logger.setLevel('DEBUG')
