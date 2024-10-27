@@ -34,7 +34,7 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
 
-    - name: Verify and Configure DVC remote
+    - name: Verify and Configure DVC remote (if needed)
       env:
         DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
       run: |
@@ -55,19 +55,6 @@ jobs:
       run: |
         dvc pull || echo "DVC pull failed. Check that files are in remote storage."
         dvc repro -v
-        dvc push
-
-    - name: Upload artifacts
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: model-artifacts
-        path: |
-          models/
-          reports/
-          model_evaluation_errors.log
-        compression-level: 0  # No compression for faster upload
-        retention-days: 90    # Keep artifacts for 90 days
 
     - name: Report Pipeline Status
       if: always()
