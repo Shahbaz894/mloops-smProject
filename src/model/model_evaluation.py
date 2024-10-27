@@ -8,41 +8,43 @@ import mlflow
 import mlflow.sklearn
 import os
 from dotenv import load_dotenv
+import requests
 
 # Load environment variables from .env file
 load_dotenv()
 
-from dotenv import load_dotenv
-import os
-
-# Load environment variables from .env file
-load_dotenv()
-dagshub_token = os.getenv("DAGSHUB_PAT")
 # Get environment variables
-dagshub_url = "https://dagshub.com"
-repo_owner = "Shahbaz894"
-dagshub_token = os.getenv('DASHUB_PAT')
-repo_name = "mloops-smProject"
+dagshub_token = os.getenv("DAGSHUB_PAT")
 dagshub_username = os.getenv("MLFLOW_TRACKING_USERNAME")
 dagshub_password = os.getenv("MLFLOW_TRACKING_PASSWORD")
+repo_owner = "Shahbaz894"
+repo_name = "mloops-smProject"
 
+# Validate environment variables
+required_env_vars = {
+    "DAGSHUB_PAT": dagshub_token,
+    "MLFLOW_TRACKING_USERNAME": dagshub_username,
+    "MLFLOW_TRACKING_PASSWORD": dagshub_password
+}
 
-dagshub_token = os.getenv('DAGSHUB_PAT')
-if dagshub_token is None:
-    raise EnvironmentError('DAGSHUB_PAT token not found')
-# Set MLflow tracking URI
-mlflow.set_tracking_uri(f'https://dagshub.com/{dagshub_username}/{repo_name}.mlflow')
+for var_name, var_value in required_env_vars.items():
+    if not var_value:
+        raise EnvironmentError(f'{var_name} not found in environment variables')
 
-print(dagshub_token)
-# logging configuration
+# Set MLflow tracking URI and credentials
+os.environ['MLFLOW_TRACKING_URI'] = f'https://dagshub.com/{repo_owner}/{repo_name}.mlflow'
+os.environ['MLFLOW_TRACKING_USERNAME'] = dagshub_username
+os.environ['MLFLOW_TRACKING_PASSWORD'] = dagshub_password
+
+# Configure logging
 logger = logging.getLogger('model_evaluation')
-logger.setLevel('DEBUG')
+logger.setLevel(logging.DEBUG)
 
+# Create handlers with proper formatting
 console_handler = logging.StreamHandler()
-console_handler.setLevel('DEBUG')
-
+console_handler.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler('model_evaluation_errors.log')
-file_handler.setLevel('ERROR')
+file_handler.setLevel(logging.ERROR)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console_handler.setFormatter(formatter)
@@ -50,6 +52,17 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def verify_mlflow_connection():
+    """Verify MLflow connection before starting the experiment"""
+    try:
+        # Test if we can connect to MLflow server
+        mlflow.search_experiments()
+        logger.debug('Successfully connected to MLflow server')
+        return True
+    except Exception as e:
+        logger.error(f'Failed to connect to MLflow server: {e}')
+        return False
 
 def load_model(file_path: str):
     try:
@@ -99,6 +112,7 @@ def evaluate_model(clf, X_test: np.ndarray, y_test: np.ndarray) -> dict:
 
 def save_metrics(metrics: dict, file_path: str) -> None:
     try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as file:
             json.dump(metrics, file, indent=4)
         logger.debug('Metrics saved to %s', file_path)
@@ -108,6 +122,7 @@ def save_metrics(metrics: dict, file_path: str) -> None:
 
 def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
     try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         model_info = {'run_id': run_id, 'model_path': model_path}
         with open(file_path, 'w') as file:
             json.dump(model_info, file, indent=4)
@@ -117,9 +132,28 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
         raise
 
 def main():
-    mlflow.set_experiment("dvc-pipeline")
-    with mlflow.start_run() as run:
-        try:
+    try:
+        # Verify MLflow connection before proceeding
+        if not verify_mlflow_connection():
+            raise ConnectionError("Cannot proceed without MLflow connection")
+
+        # Create or get experiment
+        experiment_name = "dvc-pipeline"
+        experiment = mlflow.get_experiment_by_name(experiment_name)
+        if experiment is None:
+            experiment_id = mlflow.create_experiment(experiment_name)
+            logger.debug(f'Created new experiment: {experiment_name}')
+        else:
+            experiment_id = experiment.experiment_id
+            logger.debug(f'Using existing experiment: {experiment_name}')
+
+        with mlflow.start_run(experiment_id=experiment_id) as run:
+            # Ensure directories exist
+            os.makedirs('./models', exist_ok=True)
+            os.makedirs('./data/processed', exist_ok=True)
+            os.makedirs('./reports', exist_ok=True)
+
+            # Load and evaluate model
             clf = load_model('./models/model.pkl')
             test_data = load_data('./data/processed/test_bow.csv')
             X_test = test_data.iloc[:, :-1].values
@@ -128,21 +162,27 @@ def main():
             metrics = evaluate_model(clf, X_test, y_test)
             save_metrics(metrics, 'reports/metrics.json')
             
+            # Log metrics to MLflow
             for metric_name, metric_value in metrics.items():
                 mlflow.log_metric(metric_name, metric_value)
                 
+            # Log model parameters if available
             if hasattr(clf, 'get_params'):
                 params = clf.get_params()
                 for param_name, param_value in params.items():
                     mlflow.log_param(param_name, param_value)
 
+            # Log model and artifacts
             mlflow.sklearn.log_model(clf, 'model')
             save_model_info(run.info.run_id, 'model', 'reports/experiment_info.json')
             mlflow.log_artifact('reports/metrics.json')
             mlflow.log_artifact('model_evaluation_errors.log')
-        except Exception as e:
-            logger.error('Failed to complete the model evaluation process: %s', e)
-            print(f"Error: {e}")
+            
+            logger.debug('Model evaluation completed successfully')
+
+    except Exception as e:
+        logger.error('Failed to complete the model evaluation process: %s', e)
+        raise
 
 if __name__ == '__main__':
     main()
