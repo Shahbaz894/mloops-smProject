@@ -38,6 +38,12 @@ jobs:
       env:
         DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
       run: |
+        # Check if the 'origin' remote exists in DVC config
+        if ! dvc remote list | grep -q "^origin"; then
+          echo "Adding DVC remote 'origin'"
+          dvc remote add origin https://dagshub.com/Shahbaz894/mloops-smProject.dvc
+        fi
+        # Set authentication for the DVC remote
         dvc remote modify --local origin auth basic
         dvc remote modify --local origin user ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         dvc remote modify --local origin password ${{ secrets.DAGSHUB_PAT }}
