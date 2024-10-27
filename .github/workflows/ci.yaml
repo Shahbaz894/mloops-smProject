@@ -14,12 +14,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Required for DVC to access git history
 
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
@@ -27,8 +27,8 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install dvc dvc[gdrive]  # Install DVC with Google Drive support if needed
-    
+        pip install dvc dvc[gdrive]
+
     - name: Configure Git credentials
       run: |
         git config --global user.email "github-actions@github.com"
@@ -50,18 +50,20 @@ jobs:
         MLFLOW_TRACKING_URI: https://dagshub.com/Shahbaz894/mloops-smProject.mlflow
       run: |
         dvc pull
-        dvc repro -v  # Added -v for verbose output
+        dvc repro -v
         dvc push
 
     - name: Upload artifacts
       if: success()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: model-artifacts
         path: |
           models/
           reports/
           model_evaluation_errors.log
+        compression-level: 0  # No compression for faster upload
+        retention-days: 90    # Keep artifacts for 90 days
 
     - name: Report Pipeline Status
       if: always()
